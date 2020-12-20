@@ -1,0 +1,83 @@
+parameters:
+  jsonapi-default_path: ''
+  jsonapi-prefix: 'v'
+  jsonapi-available: []
+
+services:
+  jsonapi.router_handler:
+    class: UniMethod\Bundle\Routing\JsonapiRouterHandler
+    arguments:
+      - '@UniMethod\Bundle\Service\PathResolver'
+    tags:
+      - 'routing.loader'
+
+  jsonapi.object_manager:
+    class: UniMethod\Bundle\Service\ObjectManager
+    arguments:
+      - '@doctrine.orm.default_entity_manager'
+
+  jsonapi.container_manager:
+    class: UniMethod\Bundle\Service\ContainerManager
+    arguments:
+      - '@service_container'
+
+  jsonapi.yaml_loader:
+    class: UniMethod\Bundle\Service\YamlLoader
+    arguments:
+      - '@jsonapi.container_manager'
+
+  jsonapi.config_store:
+    class: UniMethod\JsonapiMapper\Config\ConfigStore
+    factory:   ['@UniMethod\Bundle\Service\PathResolver', getConfigStore]
+
+  UniMethod\JsonapiMapper\Service\Serializer:
+    arguments:
+      - '@jsonapi.config_store'
+
+  UniMethod\JsonapiMapper\Service\Deserializer:
+    arguments:
+      - '@jsonapi.config_store'
+      - '@jsonapi.object_manager'
+
+  UniMethod\Bundle\Service\PathResolver:
+    arguments:
+      - '@jsonapi.yaml_loader'
+      - '@parameter_bag'
+      - '@request_stack'
+
+  UniMethod\Bundle\Controller\ListController:
+    arguments:
+      - '@UniMethod\Bundle\Service\PathResolver'
+      - '@UniMethod\JsonapiMapper\Service\Serializer'
+      - '@doctrine.orm.default_entity_manager'
+    tags: ['controller.service_arguments']
+
+  UniMethod\Bundle\Controller\ViewController:
+    arguments:
+      - '@UniMethod\Bundle\Service\PathResolver'
+      - '@UniMethod\JsonapiMapper\Service\Serializer'
+      - '@doctrine.orm.default_entity_manager'
+    tags: ['controller.service_arguments']
+
+  UniMethod\Bundle\Controller\CreateController:
+    arguments:
+      - '@UniMethod\Bundle\Service\PathResolver'
+      - '@UniMethod\JsonapiMapper\Service\Deserializer'
+      - '@UniMethod\JsonapiMapper\Service\Serializer'
+      - '@doctrine.orm.default_entity_manager'
+    tags: ['controller.service_arguments']
+
+  UniMethod\Bundle\Controller\UpdateController:
+    arguments:
+      - '@UniMethod\Bundle\Service\PathResolver'
+      - '@UniMethod\JsonapiMapper\Service\Deserializer'
+      - '@UniMethod\JsonapiMapper\Service\Serializer'
+      - '@doctrine.orm.default_entity_manager'
+    tags: ['controller.service_arguments']
+
+  UniMethod\Bundle\Controller\DeleteController:
+    arguments:
+      - '@UniMethod\Bundle\Service\PathResolver'
+      - '@UniMethod\JsonapiMapper\Service\Serializer'
+      - '@doctrine.orm.default_entity_manager'
+    tags: ['controller.service_arguments']
