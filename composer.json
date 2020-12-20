@@ -1,0 +1,33 @@
+{
+    "name": "uni-method/symfony-bundle",
+    "type": "symfony-bundle",
+    "description": "Jsonapi symfony implementation bundle",
+    "require": {
+        "php": ">=7.4",
+        "uni-method/jsonapi-mapper": "^0.1.5",
+        "symfony/dependency-injection": "^4.4|^5.0",
+        "symfony/http-kernel": "^4.4|^5.0",
+        "symfony/config": "^4.4|^5.0",
+        "symfony/yaml": "^4.4|^5.0",
+        "ext-json": "*",
+        "doctrine/orm": "^2.8"
+    },
+    "require-dev": {
+        "symfony/framework-bundle": "^4.4|^5.0",
+        "symfony/phpunit-bridge": "^4.4|^5.0",
+        "roave/security-advisories": "dev-master"
+    },
+    "conflict": {
+        "twig/twig": "<1.41|<2.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "UniMethod\\Bundle\\": ""
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "UniMethod\\Bundle\\Tests\\": "tests/"
+        }
+    }
+}
