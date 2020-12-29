@@ -203,7 +203,4 @@ class ListController implements ActionInterface
         $pagination = $this->pathResolver->getPagination();
         return (int) ($pagination['offset'] ?? self::DEFAULT_OFFSET);
     }
-
-
-
 }
