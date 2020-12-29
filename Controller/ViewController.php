@@ -3,6 +3,7 @@
 namespace UniMethod\Bundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectRepository;
 use UniMethod\Bundle\Service\PathResolver;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use UniMethod\JsonapiMapper\Exception\ConfigurationException;
@@ -30,9 +31,44 @@ class ViewController implements ActionInterface
      */
     public function action(): JsonResponse
     {
-        $alias = $this->pathResolver->getAlias();
-        $class = $this->pathResolver->getConfigStore()->getEntityConfigByAlias($alias)->class;
-        $included = $this->pathResolver->getIncluded();
-        return new JsonResponse($this->serializer->handleObject($this->entityManager->getRepository($class)->find($this->pathResolver->getId()), $included));
+        return new JsonResponse($this->serializer->handleObject($this->getObject(), $this->pathResolver->getIncluded()));
+    }
+
+    /**
+     * @return ObjectRepository
+     * @throws ConfigurationException
+     */
+    protected function initRepository(): ObjectRepository
+    {
+        $class = $this->pathResolver->getConfigStore()->getEntityConfigByAlias($this->getAlias())->class;
+        return $this->entityManager->getRepository($class);
+    }
+
+    /**
+     * @return object
+     * @throws ConfigurationException
+     */
+    protected function getObject(): object
+    {
+        if ($this->serializer->isSynthetic($this->getAlias())) {
+            throw new ConfigurationException('Please override getObject() function for synthetic model');
+        }
+        return $this->initRepository()->find($this->getId());
+    }
+
+    /**
+     * @return string
+     */
+    protected function getAlias(): string
+    {
+        return $this->pathResolver->getAlias();
+    }
+
+    /**
+     * @return string
+     */
+    protected function getId(): string
+    {
+        return $this->pathResolver->getId();
     }
 }

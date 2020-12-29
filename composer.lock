@@ -2891,16 +2891,16 @@
         },
         {
             "name": "uni-method/jsonapi-mapper",
-            "version": "0.1.5",
+            "version": "0.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/uni-method/json-mapper.git",
-                "reference": "48b652485eecc40e4136155c336886d9af633413"
+                "reference": "d9f072b7cba96088fdba8f2e11cddcefe8fabd31"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/uni-method/json-mapper/zipball/48b652485eecc40e4136155c336886d9af633413",
-                "reference": "48b652485eecc40e4136155c336886d9af633413",
+                "url": "https://api.github.com/repos/uni-method/json-mapper/zipball/d9f072b7cba96088fdba8f2e11cddcefe8fabd31",
+                "reference": "d9f072b7cba96088fdba8f2e11cddcefe8fabd31",
                 "shasum": ""
             },
             "require": {
@@ -2927,9 +2927,9 @@
             "description": "Just another php json mapper",
             "support": {
                 "issues": "https://github.com/uni-method/json-mapper/issues",
-                "source": "https://github.com/uni-method/json-mapper/tree/0.1.5"
+                "source": "https://github.com/uni-method/json-mapper/tree/0.1.6"
             },
-            "time": "2020-12-20T14:44:09+00:00"
+            "time": "2020-12-21T07:15:09+00:00"
         }
     ],
     "packages-dev": [
