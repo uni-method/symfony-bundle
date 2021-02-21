@@ -46,7 +46,7 @@ class YamlLoader implements ConfigLoaderInterface
             $attributes = [];
             $attributesRaw = $item['attributes'] ?? [];
             foreach ($attributesRaw as $internalType => $attribute) {
-                $attributes[] = new AttributeConfig($internalType, $attribute['type'], $attribute['setter'] ?? null, $attribute['getter']);
+                $attributes[] = new AttributeConfig($internalType, $attribute['type'], $attribute['setter'] ?? null, $attribute['getter'] ?? null);
             }
 
             $relationships = [];
