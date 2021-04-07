@@ -4,7 +4,6 @@ namespace UniMethod\Bundle\Service;
 
 use Symfony\Component\Yaml\Yaml;
 use UniMethod\JsonapiMapper\Config\AttributeConfig;
-use UniMethod\JsonapiMapper\Config\ConfigStore;
 use UniMethod\JsonapiMapper\Config\EntityConfig;
 use UniMethod\JsonapiMapper\Config\Event;
 use UniMethod\JsonapiMapper\Config\RelationshipConfig;

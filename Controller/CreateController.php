@@ -15,6 +15,8 @@ use UniMethod\JsonapiMapper\Service\Serializer;
 
 class CreateController implements ActionInterface
 {
+    use ErrorHandler;
+
     protected PathResolver $pathResolver;
     protected Deserializer $deserializer;
     protected Serializer $serializer;
@@ -27,7 +29,8 @@ class CreateController implements ActionInterface
         Serializer $serializer,
         EntityManagerInterface $entityManager,
         ValidationService $validationService
-    ) {
+    )
+    {
         $this->pathResolver = $pathResolver;
         $this->deserializer = $deserializer;
         $this->serializer = $serializer;
@@ -46,14 +49,14 @@ class CreateController implements ActionInterface
         $included = $this->pathResolver->getIncluded();
 
         $item = $this->createObject(
-            json_decode($this->pathResolver->getContent(), true, 512, JSON_THROW_ON_ERROR),
+            $this->getRawArray(),
             $included
         );
 
-        $errors = $this->validationService->validate($item);
+        $errors = $this->validate($item);
 
         if (count($errors) > 0) {
-            return new JsonResponse($this->serializer->handleErrors($errors));
+            return new JsonResponse($this->serializer->handleErrors($errors), $this->getStatusByErrors($errors));
         }
 
         $this->saveObject($item);
@@ -88,5 +91,14 @@ class CreateController implements ActionInterface
     {
         $this->entityManager->persist($item);
         $this->entityManager->flush();
+    }
+
+    /**
+     * @return array
+     * @throws JsonException
+     */
+    protected function getRawArray(): array
+    {
+        return json_decode($this->pathResolver->getContent(), true, 512, JSON_THROW_ON_ERROR);
     }
 }

@@ -27,11 +27,13 @@ services:
       - '@jsonapi.container_manager'
 
   jsonapi.config_store:
-    class: UniMethod\JsonapiMapper\Config\ConfigStore
+    class: UniMethod\Bundle\Service\ConfigStore
     factory:   ['@UniMethod\Bundle\Service\PathResolver', getConfigStore]
 
   jsonapi.validator:
     class: UniMethod\Bundle\Service\ValidationService
+    arguments:
+      - '@Symfony\Component\Validator\Validator\ValidatorInterface'
 
   UniMethod\JsonapiMapper\Service\Serializer:
     arguments:

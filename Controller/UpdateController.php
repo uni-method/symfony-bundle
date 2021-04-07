@@ -15,6 +15,8 @@ use UniMethod\JsonapiMapper\Service\Serializer;
 
 class UpdateController implements ActionInterface
 {
+    use ErrorHandler;
+
     protected PathResolver $pathResolver;
     protected Deserializer $deserializer;
     protected Serializer $serializer;
@@ -46,14 +48,14 @@ class UpdateController implements ActionInterface
         $included = $this->pathResolver->getIncluded();
 
         $item = $this->updateObject(
-            json_decode($this->pathResolver->getContent(), true, 512, JSON_THROW_ON_ERROR),
+            $this->getRawArray(),
             $included
         );
 
-        $errors = $this->validationService->validate($item);
+        $errors = $this->validate($item);
 
         if (count($errors) > 0) {
-            return new JsonResponse($this->serializer->handleErrors($errors));
+            return new JsonResponse($this->serializer->handleErrors($errors), $this->getStatusByErrors($errors));
         }
 
         $this->saveObject($item);
@@ -86,5 +88,14 @@ class UpdateController implements ActionInterface
     {
         $this->entityManager->persist($item);
         $this->entityManager->flush();
+    }
+
+    /**
+     * @return array
+     * @throws JsonException
+     */
+    protected function getRawArray(): array
+    {
+        return json_decode($this->pathResolver->getContent(), true, 512, JSON_THROW_ON_ERROR);
     }
 }
