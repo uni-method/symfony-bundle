@@ -30,8 +30,7 @@ services:
     class: UniMethod\Bundle\Service\ConfigStore
     factory:   ['@UniMethod\Bundle\Service\PathResolver', getConfigStore]
 
-  jsonapi.validator:
-    class: UniMethod\Bundle\Service\ValidationService
+  UniMethod\Bundle\Service\ValidationService:
     arguments:
       - '@Symfony\Component\Validator\Validator\ValidatorInterface'
 
@@ -70,7 +69,7 @@ services:
       - '@UniMethod\JsonapiMapper\Service\Deserializer'
       - '@UniMethod\JsonapiMapper\Service\Serializer'
       - '@doctrine.orm.default_entity_manager'
-      - '@jsonapi.validator'
+      - '@UniMethod\Bundle\Service\ValidationService'
     tags: ['controller.service_arguments']
 
   UniMethod\Bundle\Controller\UpdateController:
@@ -79,7 +78,7 @@ services:
       - '@UniMethod\JsonapiMapper\Service\Deserializer'
       - '@UniMethod\JsonapiMapper\Service\Serializer'
       - '@doctrine.orm.default_entity_manager'
-      - '@jsonapi.validator'
+      - '@UniMethod\Bundle\Service\ValidationService'
     tags: ['controller.service_arguments']
 
   UniMethod\Bundle\Controller\DeleteController:
