@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use UniMethod\JsonapiMapper\Exception\ConfigurationException;
 use UniMethod\JsonapiMapper\Service\Serializer;
 
-class ViewController implements ActionInterface
+class ViewAction implements ActionInterface
 {
     protected PathResolver $pathResolver;
     protected Serializer $serializer;

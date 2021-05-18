@@ -57,6 +57,7 @@ uni_method:
 entities:
   user:
     class: 'App\Entity\User'
+    type: 'store'
     description: 'Just a user'
     attributes:
       id:
@@ -77,6 +78,6 @@ paths:
 
 app_extra:
   resource: .
-  type: extra
+  type: api
 ```
 

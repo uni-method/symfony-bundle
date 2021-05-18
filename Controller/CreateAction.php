@@ -13,7 +13,7 @@ use UniMethod\JsonapiMapper\Exception\ConfigurationException;
 use UniMethod\JsonapiMapper\Service\Deserializer;
 use UniMethod\JsonapiMapper\Service\Serializer;
 
-class UpdateController implements ActionInterface
+class CreateAction implements ActionInterface
 {
     use ErrorHandler;
 
@@ -29,7 +29,8 @@ class UpdateController implements ActionInterface
         Serializer $serializer,
         EntityManagerInterface $entityManager,
         ValidationService $validationService
-    ) {
+    )
+    {
         $this->pathResolver = $pathResolver;
         $this->deserializer = $deserializer;
         $this->serializer = $serializer;
@@ -47,7 +48,7 @@ class UpdateController implements ActionInterface
     {
         $included = $this->pathResolver->getIncluded();
 
-        $item = $this->updateObject(
+        $item = $this->createObject(
             $this->getRawArray(),
             $included
         );
@@ -64,17 +65,19 @@ class UpdateController implements ActionInterface
     }
 
     /**
-     * @param mixed $data
+     * Return object on attributes
+     *
+     * @param array $data
      * @param string $included
      * @return object
      * @throws BrokenInputException
      * @throws ConfigurationException
      */
-    protected function updateObject(array $data, string $included): object
+    protected function createObject(array $data, string $included): object
     {
         return $this->deserializer->handle(
             $data,
-            Method::UPDATE,
+            Method::CREATE,
             $included
         );
     }

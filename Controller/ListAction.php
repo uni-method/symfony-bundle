@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use UniMethod\JsonapiMapper\Exception\ConfigurationException;
 use UniMethod\JsonapiMapper\Service\Serializer;
 
-class ListController implements ActionInterface
+class ListAction implements ActionInterface
 {
     protected const DEFAULT_LIMIT = 20;
     protected const DEFAULT_OFFSET = 0;

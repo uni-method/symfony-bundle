@@ -2,11 +2,11 @@
 
 namespace UniMethod\Bundle\Routing;
 
-use UniMethod\Bundle\Controller\CreateController;
-use UniMethod\Bundle\Controller\DeleteController;
-use UniMethod\Bundle\Controller\ListController;
-use UniMethod\Bundle\Controller\UpdateController;
-use UniMethod\Bundle\Controller\ViewController;
+use UniMethod\Bundle\Controller\CreateAction;
+use UniMethod\Bundle\Controller\DeleteAction;
+use UniMethod\Bundle\Controller\ListAction;
+use UniMethod\Bundle\Controller\UpdateAction;
+use UniMethod\Bundle\Controller\ViewAction;
 use UniMethod\Bundle\Service\PathResolver;
 use RuntimeException;
 use Symfony\Component\Config\Loader\Loader;
@@ -45,7 +45,7 @@ class JsonapiRouterHandler extends Loader
                 $path = '/' . $prefix . $version . '/' . $value['item'] . '/';
                 $routeName = $prefix . $version . '_' . $value['item'] . '_' . $value['method'];
                 if ($value['method'] === Method::LIST) {
-                    $action = ListController::class . '::action';
+                    $action = ListAction::class . '::action';
                     if (!empty($value['action'])) {
                         $action = $value['action'];
                     }
@@ -55,7 +55,7 @@ class JsonapiRouterHandler extends Loader
                     $requirements = [];
                     $method = 'GET';
                 } elseif ($value['method'] === Method::VIEW) {
-                    $action = ViewController::class . '::action';
+                    $action = ViewAction::class . '::action';
                     if (!empty($value['action'])) {
                         $action = $value['action'];
                     }
@@ -68,7 +68,7 @@ class JsonapiRouterHandler extends Loader
                     $method = 'GET';
                     $path .= '{id}';
                 } elseif ($value['method'] === Method::CREATE) {
-                    $action = CreateController::class . '::action';
+                    $action = CreateAction::class . '::action';
                     if (!empty($value['action'])) {
                         $action = $value['action'];
                     }
@@ -78,7 +78,7 @@ class JsonapiRouterHandler extends Loader
                     $requirements = [];
                     $method = 'POST';
                 } elseif ($value['method'] === Method::UPDATE) {
-                    $action = UpdateController::class . '::action';
+                    $action = UpdateAction::class . '::action';
                     if (!empty($value['action'])) {
                         $action = $value['action'];
                     }
@@ -89,7 +89,7 @@ class JsonapiRouterHandler extends Loader
                     $method = 'PATCH';
                     $path .= '{id}';
                 } elseif ($value['method'] === Method::DELETE) {
-                    $action = DeleteController::class . '::action';
+                    $action = DeleteAction::class . '::action';
                     if (!empty($value['action'])) {
                         $action = $value['action'];
                     }

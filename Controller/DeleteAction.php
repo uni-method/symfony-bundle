@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use UniMethod\JsonapiMapper\Exception\ConfigurationException;
 use UniMethod\JsonapiMapper\Service\Serializer;
 
-class DeleteController
+class DeleteAction
 {
     protected PathResolver $pathResolver;
     protected Serializer $serializer;

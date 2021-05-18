@@ -30,7 +30,7 @@ class YamlLoader implements ConfigLoaderInterface
                 ->setAlias($alias)
                 ->setClass($item['class']);
 
-            if ($item['type']) {
+            if (isset($item['type'])) {
                 $entity->type = $item['type'];
             }
 
