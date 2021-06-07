@@ -6,6 +6,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Yaml\Yaml;
+use UniMethod\Bundle\Models\RouteStore;
 
 class PathResolver
 {
@@ -28,9 +29,14 @@ class PathResolver
         return $this->yamlLoader->load($this->getPath());
     }
 
-    public function getRoutesByVersion(string $version): array
+    public function getRoutesByVersion(string $version): RouteStore
     {
-        return Yaml::parseFile($this->parameterBag->get('jsonapi-default_path') . '/' . $version . '/config.yml')['paths'] ?? [];
+        return $this->yamlLoader->loadRoutes($this->parameterBag->get('jsonapi-default_path') . '/' . $version . '/config.yml');
+    }
+
+    public function getRoutes(): RouteStore
+    {
+        return $this->getRoutesByVersion($this->getVersion());
     }
 
     public function getAvailableVersions(): array {
@@ -67,6 +73,24 @@ class PathResolver
 
         $url = substr($this->request->getPathInfo(), strlen('/' . $this->getPrefix() . $this->getVersion() . '/' . $this->getAlias() . '/'));
         return explode('/', $url, 2)[0] ?? '';
+    }
+
+    public function getRawSort(): array
+    {
+        if ($this->request === null) {
+            return [];
+        }
+
+        return $this->request->query->all('sort');
+    }
+
+    public function getRawFilter(): array
+    {
+        if ($this->request === null) {
+            return [];
+        }
+
+        return $this->request->query->all('filter');
     }
 
     public function getIncluded(): string

@@ -3,6 +3,12 @@
 namespace UniMethod\Bundle\Service;
 
 use Symfony\Component\Yaml\Yaml;
+use UniMethod\Bundle\Models\Filter;
+use UniMethod\Bundle\Models\FilterStore;
+use UniMethod\Bundle\Models\Route;
+use UniMethod\Bundle\Models\RouteStore;
+use UniMethod\Bundle\Models\Sort;
+use UniMethod\Bundle\Models\SortStore;
 use UniMethod\JsonapiMapper\Config\AttributeConfig;
 use UniMethod\JsonapiMapper\Config\EntityConfig;
 use UniMethod\JsonapiMapper\Config\Event;
@@ -22,15 +28,15 @@ class YamlLoader implements ConfigLoaderInterface
 
     public function load(string $path): ConfigStore
     {
-        $value = Yaml::parseFile($path . '/config.yml');
+        $entityConfig = Yaml::parseFile($path . '/config.yml');
         $entities = [];
-        foreach ($value['entities'] as $alias => $item) {
+        foreach ($entityConfig['entities'] as $alias => $item) {
             $entity = (new EntityConfig())
                 ->setDescription($item['description'])
                 ->setAlias($alias)
                 ->setClass($item['class']);
 
-            if (isset($item['type'])) {
+            if ($item['type']) {
                 $entity->type = $item['type'];
             }
 
@@ -58,5 +64,67 @@ class YamlLoader implements ConfigLoaderInterface
             $entities[] = $entity;
         }
         return new ConfigStore($entities);
+    }
+
+    public function loadRoutes(string $path): RouteStore
+    {
+        $routes = [];
+        $routeConfig = Yaml::parseFile($path)['paths'] ?? [];
+
+        foreach ($routeConfig as $config) {
+            $route = new Route($config['item'], $config['method']);
+
+            if (!empty($config['action'])) {
+                $route->action = $config['action'];
+            }
+
+            if (!empty($config['id'])) {
+                $route->idConstraint = $config['id'];
+            }
+
+            $filters = [];
+
+            if (!empty($config['filters']) && !empty($config['filters']['list'])) {
+                foreach ($config['filters']['list'] as $filterConfig) {
+                    if (is_array($filterConfig)) {
+                        $name = array_key_first($filterConfig);
+                        $alias = $filterConfig[$name]['alias'] ?? $name;
+                    } else {
+                        $name = $filterConfig;
+                        $alias = $filterConfig;
+                    }
+
+                    $filter = new Filter($name, $alias);
+                    $filters[] = $filter;
+                }
+            }
+
+            $route->filters = new FilterStore($filters);
+
+            if (!empty($config['filters']) && !empty($config['filters']['model']) && class_exists($config['filters']['model'])) {
+                $route->filters->setModelValidator(new $config['filters']['model']);
+            }
+
+            $sortArr = [];
+
+            if (!empty($config['sort']) && !empty($config['sort']['list'])) {
+                foreach ($config['sort']['list'] as $sortConfig) {
+                    if (is_array($sortConfig)) {
+                        $name = array_key_first($sortConfig);
+                        $alias = $sortConfig[$name]['alias'] ?? '';
+                    } else {
+                        $name = $sortConfig;
+                        $alias = $sortConfig;
+                    }
+                    $sortArr[] = new Sort($name, $alias);
+                }
+            }
+
+            $route->sort = new SortStore($sortArr);
+
+            $routes[] = $route;
+        }
+
+        return new RouteStore($routes);
     }
 }

@@ -3,34 +3,50 @@
 namespace UniMethod\Bundle\Controller;
 
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Expr\Expression;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ObjectRepository;
+use UniMethod\Bundle\Models\FilterStore;
 use UniMethod\Bundle\Service\PathResolver;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use UniMethod\Bundle\Service\ValidationService;
+use UniMethod\JsonapiMapper\Config\Method;
 use UniMethod\JsonapiMapper\Exception\ConfigurationException;
 use UniMethod\JsonapiMapper\Service\Serializer;
 
 class ListAction implements ActionInterface
 {
-    protected const DEFAULT_LIMIT = 20;
-    protected const DEFAULT_OFFSET = 0;
+    /**
+     * Accepted expressions
+     */
+    protected const ACCEPTED_EXPRESSIONS = [
+        'contains',
+        'eq',
+        'gt',
+        'gte',
+        'lt',
+        'lte',
+    ];
 
     protected PathResolver $pathResolver;
     protected Serializer $serializer;
     protected EntityManagerInterface $entityManager;
+    protected ValidationService $validationService;
 
     public function __construct(
         PathResolver $pathResolver,
         Serializer $serializer,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ValidationService $validationService
     ) {
         $this->pathResolver = $pathResolver;
         $this->serializer = $serializer;
         $this->entityManager = $entityManager;
+        $this->validationService = $validationService;
     }
 
     /**
@@ -167,8 +183,133 @@ class ListAction implements ActionInterface
      */
     protected function getCriteria(): array
     {
-        return [];
+        $criteriaArr = [];
+
+        $route = $this->pathResolver->getRoutes()->filterByAliasAndMethod($this->getAlias(), Method::LIST);
+
+        if ($route === null) {
+            return [];
+        }
+
+        $rawFilter = $this->pathResolver->getRawFilter();
+        $modelValidator = $route->filters->getModelValidator();
+
+        if ($modelValidator !== null) {
+            $filterForValidation = $this->prepareFilter($route->filters, $rawFilter);
+            $models = $this->getFilterModelsForValidate($filterForValidation, $modelValidator);
+            $errors = [];
+
+            foreach ($models as $model) {
+                foreach ($this->validationService->validate($model) as $error) {
+                    $errors[] = $error;
+                }
+            }
+
+            if (count($errors) > 0) {
+                $exception = new ValidationException();
+                $exception->errors = $errors;
+                throw $exception;
+            }
+        }
+
+        foreach ($rawFilter as $property => $params) {
+            $expressions = [];
+
+            $filter = $route->filters->filterByName($property);
+
+            if ($filter !== null) {
+                foreach ($params as $expression => $value) {
+                    $expression = mb_strtolower($expression);
+                    if (in_array($expression, self::ACCEPTED_EXPRESSIONS, true)) {
+                        $expressions[] = $this->makeFilterExpression($expression, $filter->alias, $value);
+                    }
+                }
+            }
+
+            if ($expressions !== []) {
+                $criteriaArr[] = Criteria::create()->andWhere(Criteria::expr()->andX(...$expressions));
+            }
+        }
+
+        $sorts = [];
+
+        foreach ($this->pathResolver->getRawSort() as $property => $sortValue) {
+            $sort = $route->sort->filterByName($property);
+
+            if ($sort !== null) {
+                $sorts[] = [$sort->alias => $sortValue];
+            }
+        }
+
+        if ($sorts !== []) {
+            $criteriaArr[] = Criteria::create()->orderBy(array_merge(...$sorts));
+        }
+
+        return $criteriaArr;
     }
+
+    protected function prepareFilter(FilterStore $filterStore, array $filters): array
+    {
+        if ($filters === []) {
+            return [];
+        }
+
+        $result = [];
+
+        foreach ($filters as $property => $value) {
+            $filter = $filterStore->filterByName($property);
+            if ($filter !== null) {
+                $result[$filter->alias] = array_values($value);
+            }
+        }
+
+        return $result;
+    }
+
+    protected function getFilterModelsForValidate(array $filters, object $sourceObject): array
+    {
+        return array_reduce(array_keys($filters), function (array $objects, string $property) use ($filters, $sourceObject) {
+            $values = $filters[$property];
+
+            if (count($objects) === 0) {
+                foreach ($values as $value) {
+                    $object = clone $sourceObject;
+                    $object->$property = $value;
+                    $objects[] = $object;
+
+                }
+            } else {
+                $newObjects = [];
+                foreach ($objects as $object) {
+                    if (count($values) === 1) {
+                        $object->$property = $values[0];
+                        $newObjects[] = $object;
+                    } else {
+                        foreach ($values as $value) {
+                            $newObject = clone $object;
+                            $newObject->$property = $value;
+                            $newObjects[] = $newObject;
+                        }
+                    }
+                }
+                $objects = $newObjects;
+            }
+
+            return $objects;
+        }, []);
+    }
+
+    /**
+     * @param string $expression
+     * @param string $field
+     * @param mixed $value
+     * @return Expression
+     */
+    protected function makeFilterExpression(string $expression, string $field, $value): Expression
+    {
+        return Criteria::expr()->$expression($this->getAlias() . '.' . $field, $value);
+    }
+
 
     /**
      * @return mixed[]
@@ -192,7 +333,7 @@ class ListAction implements ActionInterface
     protected function getLimit(): int
     {
         $pagination = $this->pathResolver->getPagination();
-        return (int) ($pagination['limit'] ?? self::DEFAULT_LIMIT);
+        return (int)($pagination['limit'] ?? Page::DEFAULT_LIMIT);
     }
 
     /**
@@ -201,6 +342,6 @@ class ListAction implements ActionInterface
     protected function getOffset(): int
     {
         $pagination = $this->pathResolver->getPagination();
-        return (int) ($pagination['offset'] ?? self::DEFAULT_OFFSET);
+        return (int)($pagination['offset'] ?? Page::DEFAULT_OFFSET);
     }
 }

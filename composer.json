@@ -4,7 +4,7 @@
     "description": "Jsonapi symfony implementation bundle",
     "require": {
         "php": ">=7.4",
-        "uni-method/jsonapi-mapper": "^0.2.7",
+        "uni-method/jsonapi-mapper": "^0.2.8",
         "symfony/dependency-injection": "^4.4|^5.0",
         "symfony/http-kernel": "^4.4|^5.0",
         "symfony/config": "^4.4|^5.0",
@@ -17,7 +17,8 @@
     "require-dev": {
         "symfony/framework-bundle": "^4.4|^5.0",
         "symfony/phpunit-bridge": "^4.4|^5.0",
-        "roave/security-advisories": "dev-master"
+        "roave/security-advisories": "dev-latest",
+        "phpunit/phpunit": "^9.5"
     },
     "conflict": {
         "twig/twig": "<1.41|<2.10"

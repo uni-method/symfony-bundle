@@ -1,4 +1,5 @@
 /.idea
+/.phpunit.*
 
 ###> symfony/framework-bundle ###
 /.env.local

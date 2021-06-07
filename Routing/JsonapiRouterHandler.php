@@ -2,15 +2,9 @@
 
 namespace UniMethod\Bundle\Routing;
 
-use UniMethod\Bundle\Controller\CreateAction;
-use UniMethod\Bundle\Controller\DeleteAction;
-use UniMethod\Bundle\Controller\ListAction;
-use UniMethod\Bundle\Controller\UpdateAction;
-use UniMethod\Bundle\Controller\ViewAction;
 use UniMethod\Bundle\Service\PathResolver;
 use RuntimeException;
 use Symfony\Component\Config\Loader\Loader;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use UniMethod\JsonapiMapper\Config\Method;
@@ -21,9 +15,7 @@ class JsonapiRouterHandler extends Loader
 
     protected PathResolver $pathResolver;
 
-    public function __construct(
-        PathResolver $pathResolver
-    )
+    public function __construct(PathResolver $pathResolver)
     {
         $this->pathResolver = $pathResolver;
     }
@@ -40,68 +32,24 @@ class JsonapiRouterHandler extends Loader
         $versions = $this->pathResolver->getAvailableVersions();
 
         foreach ($versions as $version) {
-            $config = $this->pathResolver->getRoutesByVersion($version);
+            $config = $this->pathResolver->getRoutesByVersion($version)->all();
             foreach ($config as $value) {
-                $path = '/' . $prefix . $version . '/' . $value['item'] . '/';
-                $routeName = $prefix . $version . '_' . $value['item'] . '_' . $value['method'];
-                if ($value['method'] === Method::LIST) {
-                    $action = ListAction::class . '::action';
-                    if (!empty($value['action'])) {
-                        $action = $value['action'];
-                    }
-                    $defaults = [
-                        '_controller' => $action,
-                    ];
-                    $requirements = [];
-                    $method = 'GET';
-                } elseif ($value['method'] === Method::VIEW) {
-                    $action = ViewAction::class . '::action';
-                    if (!empty($value['action'])) {
-                        $action = $value['action'];
-                    }
-                    $defaults = [
-                        '_controller' => $action,
-                    ];
+                $path = $value->getPath($prefix, $version);
+                $routeName = $value->getRouteName($prefix, $version);
+                $method = $value->getHttpMethod();
+                $defaults = [
+                    '_controller' => $value->getAction(),
+                ];
+                $requirements = [];
+
+                if ($value->method === Method::VIEW
+                    || $value->method === Method::UPDATE
+                    || $value->method === Method::DELETE) {
                     $requirements = [
-                        'parameter' => $value['id'] ?? '\d+',
+                        'parameter' => $value->idConstraint,
                     ];
-                    $method = 'GET';
-                    $path .= '{id}';
-                } elseif ($value['method'] === Method::CREATE) {
-                    $action = CreateAction::class . '::action';
-                    if (!empty($value['action'])) {
-                        $action = $value['action'];
-                    }
-                    $defaults = [
-                        '_controller' => $action,
-                    ];
-                    $requirements = [];
-                    $method = 'POST';
-                } elseif ($value['method'] === Method::UPDATE) {
-                    $action = UpdateAction::class . '::action';
-                    if (!empty($value['action'])) {
-                        $action = $value['action'];
-                    }
-                    $defaults = [
-                        '_controller' => $action,
-                    ];
-                    $requirements = [];
-                    $method = 'PATCH';
-                    $path .= '{id}';
-                } elseif ($value['method'] === Method::DELETE) {
-                    $action = DeleteAction::class . '::action';
-                    if (!empty($value['action'])) {
-                        $action = $value['action'];
-                    }
-                    $defaults = [
-                        '_controller' => $action,
-                    ];
-                    $requirements = [];
-                    $method = 'DELETE';
-                    $path .= '{id}';
-                } else {
-                    throw new NotFoundHttpException();
                 }
+
                 $route = new Route($path, $defaults, $requirements, [], null, [], [$method]);
                 $routes->add($routeName, $route);
             }
