@@ -49,21 +49,22 @@ services:
       - '@parameter_bag'
       - '@request_stack'
 
-  UniMethod\Bundle\Controller\ListController:
+  UniMethod\Bundle\Controller\ListAction:
+    arguments:
+      - '@UniMethod\Bundle\Service\PathResolver'
+      - '@UniMethod\JsonapiMapper\Service\Serializer'
+      - '@doctrine.orm.default_entity_manager'
+      - '@UniMethod\Bundle\Service\ValidationService'
+    tags: ['controller.service_arguments']
+
+  UniMethod\Bundle\Controller\ViewAction:
     arguments:
       - '@UniMethod\Bundle\Service\PathResolver'
       - '@UniMethod\JsonapiMapper\Service\Serializer'
       - '@doctrine.orm.default_entity_manager'
     tags: ['controller.service_arguments']
 
-  UniMethod\Bundle\Controller\ViewController:
-    arguments:
-      - '@UniMethod\Bundle\Service\PathResolver'
-      - '@UniMethod\JsonapiMapper\Service\Serializer'
-      - '@doctrine.orm.default_entity_manager'
-    tags: ['controller.service_arguments']
-
-  UniMethod\Bundle\Controller\CreateController:
+  UniMethod\Bundle\Controller\CreateAction:
     arguments:
       - '@UniMethod\Bundle\Service\PathResolver'
       - '@UniMethod\JsonapiMapper\Service\Deserializer'
@@ -72,7 +73,7 @@ services:
       - '@UniMethod\Bundle\Service\ValidationService'
     tags: ['controller.service_arguments']
 
-  UniMethod\Bundle\Controller\UpdateController:
+  UniMethod\Bundle\Controller\UpdateAction:
     arguments:
       - '@UniMethod\Bundle\Service\PathResolver'
       - '@UniMethod\JsonapiMapper\Service\Deserializer'
@@ -81,7 +82,7 @@ services:
       - '@UniMethod\Bundle\Service\ValidationService'
     tags: ['controller.service_arguments']
 
-  UniMethod\Bundle\Controller\DeleteController:
+  UniMethod\Bundle\Controller\DeleteAction:
     arguments:
       - '@UniMethod\Bundle\Service\PathResolver'
       - '@UniMethod\JsonapiMapper\Service\Serializer'
