@@ -101,4 +101,13 @@ class CreateAction implements ActionInterface
     {
         return json_decode($this->pathResolver->getContent(), true, 512, JSON_THROW_ON_ERROR);
     }
+
+    /**
+     * @return string
+     * @throws JsonException
+     */
+    protected function getId(): string
+    {
+        return $this->getRawArray()['data']['id'] ?? '';
+    }
 }
