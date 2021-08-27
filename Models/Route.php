@@ -36,6 +36,10 @@ class Route
         return $prefix . $version . '_' . $this->modelAlias . '_' . $this->method;
     }
 
+    /**
+     * @return string
+     * @throws Exception
+     */
     public function getHttpMethod(): string
     {
         switch ($this->method) {
@@ -53,6 +57,10 @@ class Route
         }
     }
 
+    /**
+     * @return string
+     * @throws Exception
+     */
     public function getAction(): string
     {
         if ($this->action !== null) {

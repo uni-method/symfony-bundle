@@ -4,7 +4,7 @@
     "description": "Jsonapi symfony implementation bundle",
     "require": {
         "php": ">=7.4",
-        "uni-method/jsonapi-mapper": "^0.2.8",
+        "uni-method/jsonapi-mapper": "0.3.0",
         "symfony/dependency-injection": "^4.4|^5.0",
         "symfony/http-kernel": "^4.4|^5.0",
         "symfony/config": "^4.4|^5.0",

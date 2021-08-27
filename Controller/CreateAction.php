@@ -8,7 +8,6 @@ use JsonException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use UniMethod\Bundle\Service\ValidationService;
 use UniMethod\JsonapiMapper\Config\Method;
-use UniMethod\JsonapiMapper\Exception\BrokenInputException;
 use UniMethod\JsonapiMapper\Exception\ConfigurationException;
 use UniMethod\JsonapiMapper\Service\Deserializer;
 use UniMethod\JsonapiMapper\Service\Serializer;
@@ -40,7 +39,6 @@ class CreateAction implements ActionInterface
 
     /**
      * @return JsonResponse
-     * @throws BrokenInputException
      * @throws ConfigurationException
      * @throws JsonException
      */
@@ -70,7 +68,6 @@ class CreateAction implements ActionInterface
      * @param array $data
      * @param string $included
      * @return object
-     * @throws BrokenInputException
      * @throws ConfigurationException
      */
     protected function createObject(array $data, string $included): object
@@ -99,7 +96,11 @@ class CreateAction implements ActionInterface
      */
     protected function getRawArray(): array
     {
-        return json_decode($this->pathResolver->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        try {
+            return json_decode($this->pathResolver->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw $exception;
+        }
     }
 
     /**
